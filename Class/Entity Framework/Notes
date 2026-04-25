@@ -1,0 +1,52 @@
+EF means 
+ - tool in .net that helps us to work with database using c# code instead of SQL queries.
+ - EF automatically converts c# code into SQL queries.
+ - EF removes the wiriting SQL queris manually. It allows devlopers to interract with database
+   using objects.
+
+Why we use EF
+ - Witohut EF write SQL queries manually
+ - more chance of error 
+ - time consuming.
+
+ + less code 
+ + easy to code/develop
+ + easy to maintain
+
+without EF 
+ - select * from Student where id = 1;
+with EF 
+ - context.Students.find(1);
+
+EF core 
+ - Latest, lightweight and cross platform version
+ - EF core is a modern version of EF that works on Windows, Linux and, Mack.
+
+ORM 
+ - It maps c# classes to the database tables and object to row.
+
+
+Coding approch 
+ - There are 3 types of coding approch 
+    1. Code first approch
+     - Start with coding database created automatically.
+     - C# classes -> DBContext -> Migration -> Database.
+
+    2. Database first approch
+     - Database is already exists gunerate c# classes from DB 
+
+DBContext
+  - DBContext is a main class that connects your application to the database
+  Ex 
+    public DBSet<Student> Students {get; set;}
+
+DBSet 
+ - represent table in database.
+
+Migration 
+ - Migration is used to create or update the Database structure automatically.
+
+
+Activity 
+ - what is crud operation
+ - what is HTTP methods
