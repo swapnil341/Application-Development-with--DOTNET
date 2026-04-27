@@ -1,0 +1,308 @@
+﻿@model List<ExpenseTracker.Models.MonthlyExpenseSummary>
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Financial Dashboard";
+
+    var labels     = JsonSerializer.Serialize(Model.Select(x => x.Month).ToList());
+    var amounts    = JsonSerializer.Serialize(Model.Select(x => x.TotalAmount).ToList());
+    var totalSpend = Model.Sum(x => x.TotalAmount);
+    var avgMonthly = Model.Count > 0 ? totalSpend / Model.Count : 0;
+    var peakMonth  = Model.OrderByDescending(x => x.TotalAmount).FirstOrDefault();
+}
+
+<!-- Inline styles scoped to this page only -->
+<style>
+    .kpi-card {
+        border: none;
+        border-radius: 1rem;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12) !important;
+    }
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: .75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .chart-card {
+        border: none;
+        border-radius: 1rem;
+    }
+    .table thead th {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #6c757d;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .amount-pill {
+        font-size: .82rem;
+        font-weight: 600;
+        padding: .3rem .75rem;
+        border-radius: 2rem;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+
+    <!-- ── Page Header ── -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <h4 class="fw-bold mb-0">Financial Analytics Dashboard</h4>
+            <p class="text-muted small mb-0">Month-wise breakdown of all recorded expenses</p>
+        </div>
+        <a asp-controller="Expenses" asp-action="Create" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-plus-circle me-1"></i>Add Expense
+        </a>
+    </div>
+
+    <!-- ── KPI Row ── -->
+    <div class="row g-3 mb-4">
+        <!-- Total Spend -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card kpi-card shadow-sm h-100 px-3 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Total Spend</p>
+                        <h5 class="fw-bold mb-0 text-danger">@totalSpend.ToString("C")</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Monthly Average -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card kpi-card shadow-sm h-100 px-3 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Monthly Average</p>
+                        <h5 class="fw-bold mb-0 text-primary">@avgMonthly.ToString("C")</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Peak Month -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="card kpi-card shadow-sm h-100 px-3 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Peak Month</p>
+                        @if (peakMonth != null)
+                        {
+                            <h5 class="fw-bold mb-0 text-warning">
+                                @peakMonth.Month
+                                <small class="text-muted fs-6 fw-normal">
+                                    (@peakMonth.TotalAmount.ToString("C"))
+                                </small>
+                            </h5>
+                        }
+                        else
+                        {
+                            <h5 class="fw-bold mb-0 text-muted">N/A</h5>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <!-- Empty State -->
+        <div class="card chart-card shadow-sm text-center py-5">
+            <div class="card-body">
+                <i class="bi bi-inbox text-muted" style="font-size:3rem;"></i>
+                <h5 class="mt-3 text-muted">No expense data yet</h5>
+                <p class="text-muted small">Add your first expense to see the dashboard come to life.</p>
+                <a asp-controller="Expenses" asp-action="Create" class="btn btn-primary btn-sm px-4 mt-1">
+                    <i class="bi bi-plus-circle me-1"></i>Add Expense
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ── Main Two-Column Layout ── -->
+        <div class="row g-4 align-items-start">
+
+            <!-- LEFT — Bar Chart -->
+            <div class="col-12 col-lg-7">
+                <div class="card chart-card shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-0 px-4">
+                        <h6 class="fw-semibold mb-0">
+                            <i class="bi bi-bar-chart-fill text-primary me-2"></i>
+                            Monthly Expense Overview
+                        </h6>
+                        <p class="text-muted small mb-0">Bar chart of total spending per month</p>
+                    </div>
+                    <div class="card-body px-3 pb-3">
+                        <canvas id="expenseChart" style="max-height:340px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT — Data Table -->
+            <div class="col-12 col-lg-5">
+                <div class="card chart-card shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-0 px-4">
+                        <h6 class="fw-semibold mb-0">
+                            <i class="bi bi-table text-success me-2"></i>
+                            Month-wise Totals
+                        </h6>
+                        <p class="text-muted small mb-0">Chronological breakdown</p>
+                    </div>
+                    <div class="card-body px-4 pb-0">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Month</th>
+                                    <th class="text-end">Total Amount</th>
+                                    <th class="text-end">Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int row = 1; }
+                                @foreach (var item in Model)
+                                {
+                                    var share = totalSpend > 0
+                                        ? (item.TotalAmount / totalSpend) * 100
+                                        : 0;
+
+                                    <tr>
+                                        <td class="text-muted small">@row++</td>
+                                        <td>
+                                            <span class="fw-medium">@item.Month</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="amount-pill bg-danger bg-opacity-10 text-danger">
+                                                @item.TotalAmount.ToString("C")
+                                            </span>
+                                        </td>
+                                        <td class="text-end text-muted small">
+                                            @share.ToString("F1")%
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="2" class="fw-bold text-end">Grand Total</td>
+                                    <td class="text-end">
+                                        <span class="amount-pill bg-danger text-white">
+                                            @totalSpend.ToString("C")
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-semibold">100%</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /row -->
+    }
+
+</div><!-- /container -->
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const labels  = @Html.Raw(labels);
+            const amounts = @Html.Raw(amounts);
+
+            if (!labels || labels.length === 0) return;
+
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+
+            // Build a gradient fill for the bars
+            const gradient = ctx.createLinearGradient(0, 0, 0, 340);
+            gradient.addColorStop(0,   'rgba(220, 53, 69, 0.85)');
+            gradient.addColorStop(1,   'rgba(220, 53, 69, 0.15)');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Expenses',
+                        data: amounts,
+                        backgroundColor: gradient,
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        hoverBackgroundColor: 'rgba(220, 53, 69, 0.95)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#212529',
+                            titleColor: '#f8f9fa',
+                            bodyColor: '#adb5bd',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: ctx =>
+                                    ' $' + ctx.parsed.y.toLocaleString('en-US', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    })
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#6c757d',
+                                font: { size: 11 },
+                                maxRotation: 35,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6c757d',
+                                font: { size: 11 },
+                                callback: v =>
+                                    '$' + v.toLocaleString('en-US', {
+                                        minimumFractionDigits: 0
+                                    })
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+}
