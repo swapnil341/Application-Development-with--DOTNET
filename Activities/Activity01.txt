@@ -1,0 +1,12 @@
+1. Generics
+Examples of Generics:
+•	Generic List: List<T> allows you to create a list for any data type (e.g., List<int> or List<string>).
+•	Generic Method: A method that swaps two items of any type:
+C#
+public void Swap<T>(ref T a, ref T b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+Real-time use & Why companies use them: Companies use generics to ensure Type Safety (catching errors at compile-time rather than runtime) and Code Reusability. Instead of writing separate logic for integers, strings, and custom objects, a single generic class handles them all, reducing code duplication and memory overhead (avoiding "boxing/unboxing").
+

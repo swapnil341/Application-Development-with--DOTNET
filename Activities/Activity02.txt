@@ -1,0 +1,13 @@
+2. Lambda Expressions
+Examples:
+•	Basic Math: (int x, int y) => x + y;
+•	Filtering: list.FindAll(x => x > 10);
+Company Use: Used extensively in LINQ queries, handling UI events (button clicks), 
+	and passing logic as parameters to asynchronous methods to keep code concise and readable.
+Generic Class with Lambda:
+public class DataStore<T> {
+    public Action<T, T> StoreAction = (val1, val2) => {
+        Console.WriteLine($"Stored: {val1} and {val2}");
+    };
+}
+// Usage: var store = new DataStore<string>(); store.StoreAction("A", "B");

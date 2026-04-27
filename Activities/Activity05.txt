@@ -1,0 +1,5 @@
+Experiment 5: Asynchronous Programming
+•	Synchronous: The thread is blocked; the program waits for the task to finish before moving to the next line.
+•	Asynchronous (async/await): The thread is released to do other work while waiting for the task (like a database call) to complete.
+•	Thread.Sleep vs Task.Delay: Thread.Sleep freezes the entire thread (bad for UI). Task.Delay is a logical delay that doesn't block the thread, allowing the app to remain responsive.
+

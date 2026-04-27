@@ -1,0 +1,9 @@
+4. Experiment 4: Delegates & LINQ
+1.	Calculator using Delegate:
+C#
+public delegate double CalcDelegate(double a, double b);
+// Use: CalcDelegate add = (a, b) => a + b;
+2.	Multicast Delegate: A delegate that holds references to multiple methods. When invoked, all methods are called in sequence.
+3.	Sort List using Lambda: myList.Sort((x, y) => x.CompareTo(y));
+4.	LINQ Queries: Language Integrated Query (LINQ) provides a uniform syntax to query data from different sources (SQL, XML, Collections) directly in C#. Example: var result = list.Where(n => n.StartsWith("A"));
+

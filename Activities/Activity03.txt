@@ -1,0 +1,5 @@
+3. MVC & IActionResult
+IActionResult is an interface used as a return type for Controller actions. 
+It is flexible because it allows a single method to return different results based on logic—such as a View(), 
+a Json() object, a NotFound() error, or a Redirect().
+
